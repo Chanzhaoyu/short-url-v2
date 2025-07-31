@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  short-url-api:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=file:./dev.db
+      - JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+      - JWT_EXPIRES_IN=7d
+      - APP_PORT=3000
+      - APP_URL=http://localhost:3000
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
