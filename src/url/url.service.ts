@@ -3,17 +3,21 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  Inject,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUrlDto } from './dto/create-url.dto';
 import { UpdateUrlDto } from './dto/update-url.dto';
 import { ConfigService } from '@nestjs/config';
+import { CacheService } from '../cache/cache.interface';
+import { CACHE_SERVICE } from '../cache/cache.module';
 
 @Injectable()
 export class UrlService {
   constructor(
     private prisma: PrismaService,
     private configService: ConfigService,
+    @Inject(CACHE_SERVICE) private cacheService: CacheService,
   ) {}
 
   private generateShortCode(): string {
@@ -24,6 +28,18 @@ export class UrlService {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return result;
+  }
+
+  private getCacheKey(shortCode: string): string {
+    return `url:${shortCode}`;
+  }
+
+  private getUserUrlsCacheKey(
+    userId: string,
+    page: number,
+    limit: number,
+  ): string {
+    return `user_urls:${userId}:${page}:${limit}`;
   }
 
   async create(createUrlDto: CreateUrlDto, userId: string) {
@@ -74,6 +90,21 @@ export class UrlService {
         },
       },
     });
+
+    // 缓存新创建的短链信息
+    const cacheData = {
+      id: url.id,
+      originalUrl: url.originalUrl,
+      userId: url.userId,
+      isActive: url.isActive,
+      expiresAt: url.expiresAt,
+    };
+    const cacheTTL = this.configService.get<number>('CACHE_TTL', 300);
+    await this.cacheService.set(
+      this.getCacheKey(url.shortCode),
+      cacheData,
+      cacheTTL,
+    );
 
     return {
       ...url,
@@ -160,6 +191,9 @@ export class UrlService {
       },
     });
 
+    // 清除缓存，因为数据已更新
+    await this.cacheService.del(this.getCacheKey(updatedUrl.shortCode));
+
     return {
       ...updatedUrl,
       shortUrl: `${this.configService.get('APP_URL')}/${updatedUrl.shortCode}`,
@@ -179,23 +213,44 @@ export class UrlService {
       where: { id },
     });
 
+    // 清除缓存
+    await this.cacheService.del(this.getCacheKey(url.shortCode));
+
     return { message: '短链已删除' };
   }
 
   async redirect(shortCode: string, req: any) {
-    const url = await this.prisma.url.findUnique({
-      where: { shortCode },
-    });
+    // 首先尝试从缓存获取
+    const cacheKey = this.getCacheKey(shortCode);
+    let url = await this.cacheService.get<any>(cacheKey);
 
     if (!url) {
-      throw new NotFoundException('短链不存在');
+      // 缓存未命中，从数据库查询
+      url = await this.prisma.url.findUnique({
+        where: { shortCode },
+      });
+
+      if (!url) {
+        throw new NotFoundException('短链不存在');
+      }
+
+      // 缓存查询结果
+      const cacheData = {
+        id: url.id,
+        originalUrl: url.originalUrl,
+        userId: url.userId,
+        isActive: url.isActive,
+        expiresAt: url.expiresAt,
+      };
+      const cacheTTL = this.configService.get<number>('CACHE_TTL', 300);
+      await this.cacheService.set(cacheKey, cacheData, cacheTTL);
     }
 
     if (!url.isActive) {
       throw new BadRequestException('短链已禁用');
     }
 
-    if (url.expiresAt && new Date() > url.expiresAt) {
+    if (url.expiresAt && new Date() > new Date(url.expiresAt)) {
       throw new BadRequestException('短链已过期');
     }
 

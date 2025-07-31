@@ -1,8 +1,119 @@
-# 短链服务 API
+# 🔗 短链服务 API
 
-一个基于 NestJS、Prisma 和 SQLite 构建的短链服务后端，支持用户认证、链接管理和访问统计。
+一个基于 NestJS、Prisma 和 SQLite 构建的现代化短链服务，支持用户认证和智能缓存。
 
-## 功能特性
+## ✨ 特性
+
+- 🚀 **高性能**: 支持 node-cache 和 Redis 双重缓存策略
+- 🔐 **安全认证**: JWT + bcrypt 密码加密
+- 📊 **数据分析**: 详细的访问统计和分析
+- 🛡️ **类型安全**: 完整的 TypeScript 支持
+- 🏗️ **模块化**: 清晰的架构设计，易于扩展
+- 🎯 **生产就绪**: 完整的错误处理和验证机制
+
+## 🚀 快速开始
+
+### 前置要求
+- Node.js 18+
+- pnpm (推荐) 或 npm
+
+### 安装和运行
+
+```bash
+# 安装依赖
+pnpm install
+
+# 初始化数据库
+npx prisma migrate dev --name init
+
+# 启动开发服务器
+pnpm run start:dev
+```
+
+服务将在 `http://localhost:3000` 启动
+
+### 快速测试
+
+```bash
+# 给测试脚本添加执行权限
+chmod +x test-api.sh
+
+# 运行完整的 API 测试
+./test-api.sh
+```
+
+## 📚 API 使用示例
+
+### 1. 用户注册和登录
+
+```bash
+# 注册用户
+curl -X POST http://localhost:3000/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "email": "test@example.com",
+    "password": "password123"
+  }'
+
+# 登录获取 Token
+curl -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "password": "password123"
+  }'
+```
+
+### 2. 创建和管理短链
+
+```bash
+# 创建短链
+curl -X POST http://localhost:3000/urls \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "originalUrl": "https://github.com",
+    "title": "GitHub",
+    "description": "Code hosting platform"
+  }'
+
+# 访问短链 (会自动重定向)
+curl -L http://localhost:3000/SHORT_CODE
+```
+
+### 3. 缓存配置
+
+在 `.env` 文件中配置缓存类型：
+
+```env
+# 使用内存缓存 (默认)
+CACHE_TYPE="node-cache"
+
+# 或使用 Redis 缓存
+CACHE_TYPE="redis"
+REDIS_HOST="localhost"
+REDIS_PORT=6379
+```
+
+## 📊 功能概览
+
+| 功能 | 状态 | 描述 |
+|------|------|------|
+| 用户注册/登录 | ✅ | JWT 认证，密码加密 |
+| 短链生成 | ✅ | 自动生成唯一短代码 |
+| 短链重定向 | ✅ | 快速重定向到原始 URL |
+| 访问统计 | ✅ | 点击次数和分析数据 |
+| 缓存系统 | ✅ | node-cache/Redis 双选择 |
+| URL 管理 | ✅ | 增删改查完整功能 |
+| 过期设置 | ✅ | 支持设置链接过期时间 |
+| 用户权限 | ✅ | 用户只能管理自己的链接 |
+
+---
+
+📖 **详细文档**: 查看 [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) 获取完整的 API 文档
+
+**项目状态**: ✅ 生产环境就绪
 
 - ✅ 用户注册和登录
 - ✅ JWT 身份认证
