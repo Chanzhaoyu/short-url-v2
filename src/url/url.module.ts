@@ -9,5 +9,6 @@ import { CacheModule } from '../cache/cache.module';
   imports: [PrismaModule, ConfigModule, CacheModule],
   controllers: [UrlController],
   providers: [UrlService],
+  exports: [UrlService],
 })
 export class UrlModule {}

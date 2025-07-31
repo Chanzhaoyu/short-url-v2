@@ -6,7 +6,8 @@
 
 - 🚀 **高性能**: 支持 node-cache 和 Redis 双重缓存策略
 - 🔐 **安全认证**: JWT + bcrypt 密码加密
-- 📊 **数据分析**: 详细的访问统计和分析
+- � **OpenAPI 支持**: API Key 管理，支持第三方应用集成
+- �📊 **数据分析**: 详细的访问统计和分析
 - 🛡️ **类型安全**: 完整的 TypeScript 支持
 - 🏗️ **模块化**: 清晰的架构设计，易于扩展
 - 🎯 **生产就绪**: 完整的错误处理和验证机制
@@ -40,6 +41,10 @@ chmod +x test-api.sh
 
 # 运行完整的 API 测试
 ./test-api.sh
+
+# 运行 OpenAPI 功能测试
+chmod +x test-openapi.sh
+./test-openapi.sh
 ```
 
 ## 📚 API 使用示例
@@ -96,11 +101,70 @@ REDIS_HOST="localhost"
 REDIS_PORT=6379
 ```
 
+### 4. OpenAPI / API Key 使用
+
+#### 创建 API Key
+
+```bash
+# 首先登录获取 JWT Token
+TOKEN=$(curl -s -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "testuser", "password": "password123"}' | \
+  jq -r '.token')
+
+# 创建 API Key
+curl -X POST http://localhost:3000/api-keys \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"name": "My API Key"}'
+```
+
+#### 使用 API Key 调用 API
+
+```bash
+# 使用 API Key 创建短链
+curl -X POST http://localhost:3000/api/v1/urls \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "originalUrl": "https://example.com",
+    "title": "Example Site"
+  }'
+
+# 使用 API Key 获取短链列表
+curl -X GET http://localhost:3000/api/v1/urls \
+  -H "Authorization: Bearer YOUR_API_KEY"
+
+# 使用 API Key 获取分析数据
+curl -X GET http://localhost:3000/api/v1/urls/SHORT_CODE/analytics \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+#### API Key 管理
+
+```bash
+# 列出所有 API Keys
+curl -X GET http://localhost:3000/api-keys \
+  -H "Authorization: Bearer $TOKEN"
+
+# 更新 API Key
+curl -X PATCH http://localhost:3000/api-keys/API_KEY_ID \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"name": "Updated API Key Name"}'
+
+# 删除 API Key
+curl -X DELETE http://localhost:3000/api-keys/API_KEY_ID \
+  -H "Authorization: Bearer $TOKEN"
+```
+
 ## 📊 功能概览
 
 | 功能 | 状态 | 描述 |
 |------|------|------|
 | 用户注册/登录 | ✅ | JWT 认证，密码加密 |
+| API Key 管理 | ✅ | 生成、删除和管理 API Keys |
+| OpenAPI 支持 | ✅ | 通过 API Key 调用所有短链功能 |
 | 短链生成 | ✅ | 自动生成唯一短代码 |
 | 短链重定向 | ✅ | 快速重定向到原始 URL |
 | 访问统计 | ✅ | 点击次数和分析数据 |
@@ -117,12 +181,15 @@ REDIS_PORT=6379
 
 - ✅ 用户注册和登录
 - ✅ JWT 身份认证
+- ✅ API Key 管理系统
+- ✅ OpenAPI 第三方集成支持
 - ✅ 创建和管理短链
 - ✅ 自定义短码支持
 - ✅ 链接访问统计
 - ✅ 链接过期时间设置
 - ✅ 点击分析和统计
 - ✅ 链接启用/禁用
+- ✅ 双重缓存系统 (node-cache/Redis)
 
 ## 技术栈
 
