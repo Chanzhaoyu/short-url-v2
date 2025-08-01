@@ -161,6 +161,30 @@
             animation: pulse 2s infinite;
         }
 
+        .github-link {
+            display: inline-flex;
+            align-items: center;
+            background: #24292e;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: background-color 0.3s ease;
+        }
+
+        .github-link:hover {
+            background: #1a1e22;
+            transform: translateY(-1px);
+        }
+
+        .github-link::before {
+            content: "⭐";
+            margin-right: 8px;
+        }
+
         @keyframes pulse {
 
             0%,
@@ -264,6 +288,9 @@
 
         <div class="footer">
             <p>✨ 由 NestJS 强力驱动 | 🔒 安全可靠 | ⚡ 高性能</p>
+            <a href="https://github.com/Chanzhaoyu/short-url-v2" target="_blank" class="github-link">
+                查看源码
+            </a>
         </div>
     </div>
 </body>
