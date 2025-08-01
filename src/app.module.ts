@@ -8,6 +8,7 @@ import { UrlModule } from './url/url.module';
 import { CacheModule } from './cache/cache.module';
 import { ApiKeyModule } from './api-key/api-key.module';
 import { OpenApiModule } from './open-api/open-api.module';
+import { TemplateModule } from './template/template.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { OpenApiModule } from './open-api/open-api.module';
     CacheModule,
     ApiKeyModule,
     OpenApiModule,
+    TemplateModule,
   ],
   controllers: [AppController],
   providers: [AppService],

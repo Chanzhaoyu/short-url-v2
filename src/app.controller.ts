@@ -1,14 +1,18 @@
 import { Controller, Get, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { AppService } from './app.service';
+import { TemplateService } from './template/template.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(
+    private readonly appService: AppService,
+    private readonly templateService: TemplateService,
+  ) {}
 
   @Get()
   getHello(@Res() res: Response): void {
-    const html = this.appService.getHelloHTML();
+    const html = this.templateService.getIndexHTML();
     res.setHeader('Content-Type', 'text/html');
     res.send(html);
   }
@@ -23,7 +27,7 @@ export class AppController {
       version: process.env.npm_package_version || '1.0.0',
     };
 
-    const html = this.appService.getHealthHTML(healthData);
+    const html = this.templateService.getHealthHTML(healthData);
     res.setHeader('Content-Type', 'text/html');
     res.send(html);
   }
