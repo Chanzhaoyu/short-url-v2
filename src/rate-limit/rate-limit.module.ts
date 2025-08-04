@@ -2,8 +2,10 @@ import { Module, OnModuleInit } from '@nestjs/common';
 import { RateLimitService } from './rate-limit.service';
 import { RateLimitGuard } from './rate-limit.guard';
 import { RateLimitController } from './rate-limit.controller';
+import { ApiKeyModule } from '../api-key/api-key.module';
 
 @Module({
+  imports: [ApiKeyModule],
   providers: [RateLimitService, RateLimitGuard],
   controllers: [RateLimitController],
   exports: [RateLimitService, RateLimitGuard],
