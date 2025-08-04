@@ -9,6 +9,7 @@ import { CacheModule } from './cache/cache.module';
 import { ApiKeyModule } from './api-key/api-key.module';
 import { OpenApiModule } from './open-api/open-api.module';
 import { TemplateModule } from './template/template.module';
+import { RateLimitModule } from './rate-limit/rate-limit.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { TemplateModule } from './template/template.module';
     ApiKeyModule,
     OpenApiModule,
     TemplateModule,
+    RateLimitModule,
   ],
   controllers: [AppController],
   providers: [AppService],
